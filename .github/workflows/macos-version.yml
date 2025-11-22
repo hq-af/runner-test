@@ -1,41 +1,26 @@
-name: macOS Version + VNC
+name: macOS VNC Access
 
 on: [workflow_dispatch]
 
 jobs:
-  print-macos-version:
+  enable-vnc:
     runs-on: macos-latest
     steps:
       - name: Show macOS version
         run: sw_vers
 
-      - name: Install Homebrew (needed to install x11vnc)
+      - name: Enable Apple Screen Sharing VNC server
         run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-
-      - name: Install x11vnc
-        run: |
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-          brew install x11vnc
-
-      - name: Set VNC password
-        run: |
-          mkdir -p ~/.vnc
-          # Set your password here (change "mypassword")
-          x11vnc -storepasswd "mypassword" ~/.vnc/passwd
-
-      - name: Start VNC server
-        run: |
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-          # Start in background
-          x11vnc -rfbauth ~/.vnc/passwd -forever -shared -bg -nopw -rfbport 5900
+          # Enable Remote Management (ARDAgent)
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
+            -activate -configure -access -on -clientopts -setvnclegacy -vnclegacy yes \
+            -clientopts -setvncpw -vncpw "mypassword" \
+            -restart -agent -privs -all
 
       - name: Display connection info
         run: |
           IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || echo "Unknown")
-          echo "VNC Server is running."
-          echo "IP: $IP"
-          echo "Port: 5900"
+          echo "VNC server enabled (macOS built-in)."
+          echo "Connect using:"
+          echo "vnc://$IP"
           echo "Password: mypassword"
