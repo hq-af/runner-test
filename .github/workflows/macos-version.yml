@@ -1,4 +1,4 @@
-name: macOS Version
+name: macOS Version + VNC
 
 on: [workflow_dispatch]
 
@@ -8,3 +8,34 @@ jobs:
     steps:
       - name: Show macOS version
         run: sw_vers
+
+      - name: Install Homebrew (needed to install x11vnc)
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      - name: Install x11vnc
+        run: |
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          brew install x11vnc
+
+      - name: Set VNC password
+        run: |
+          mkdir -p ~/.vnc
+          # Set your password here (change "mypassword")
+          x11vnc -storepasswd "mypassword" ~/.vnc/passwd
+
+      - name: Start VNC server
+        run: |
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          # Start in background
+          x11vnc -rfbauth ~/.vnc/passwd -forever -shared -bg -nopw -rfbport 5900
+
+      - name: Display connection info
+        run: |
+          IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || echo "Unknown")
+          echo "VNC Server is running."
+          echo "IP: $IP"
+          echo "Port: 5900"
+          echo "Password: mypassword"
