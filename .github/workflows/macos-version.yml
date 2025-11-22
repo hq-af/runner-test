@@ -9,14 +9,26 @@ jobs:
       - name: Show macOS version
         run: sw_vers
 
-      - name: Take screenshot of virtual display
-        run: screencapture screenshot.png
+      - name: Install RustDesk
+        run: |
+          brew update
+          brew install --cask rustdesk
 
-      - name: Upload screenshot
+      - name: Launch RustDesk
+        run: |
+          open -a RustDesk
+          sleep 10  # give it time to launch
+
+      - name: Take Screenshot
+        run: |
+          mkdir -p screenshots
+          screencapture screenshots/rustdesk.png
+
+      - name: Upload Screenshot Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-desktop-screenshot
-          path: screenshot.png
+          name: rustdesk-screenshot
+          path: screenshots/rustdesk.png
 
-      - name: Output artifact URL
-        run: echo "Artifact URL will be available in the 'Artifacts' section of this workflow run."
+      - name: Sleep for 5 minutes
+        run: sleep 300
