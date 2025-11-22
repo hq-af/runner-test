@@ -16,7 +16,7 @@ jobs:
 
       - name: Launch RustDesk
         run: |
-          open -a RustDesk
+          open /Applications/RustDesk.app
           sleep 10  # give it time to launch
 
       - name: Take Screenshot
