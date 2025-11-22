@@ -9,18 +9,24 @@ jobs:
       - name: Show macOS version
         run: sw_vers
 
-      - name: Enable Apple Screen Sharing VNC server
+      - name: Enable Apple Screen Sharing (VNC)
         run: |
-          # Enable Remote Management (ARDAgent)
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
-            -activate -configure -access -on -clientopts -setvnclegacy -vnclegacy yes \
+            -activate -configure -access -on \
+            -clientopts -setvnclegacy -vnclegacy yes \
             -clientopts -setvncpw -vncpw "mypassword" \
             -restart -agent -privs -all
 
       - name: Display connection info
         run: |
-          IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || echo "Unknown")
-          echo "VNC server enabled (macOS built-in)."
-          echo "Connect using:"
-          echo "vnc://$IP"
+          LOCAL_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || echo "Unknown")
+          PUBLIC_IP=$(curl -s https://api.ipify.org || echo "Unavailable")
+
+          echo "VNC server enabled."
+          echo "Local IP: $LOCAL_IP"
+          echo "Public IP (external): $PUBLIC_IP"
+          echo "Port: 5900"
           echo "Password: mypassword"
+
+          echo "Sleeping for 5 minutes..."
+          sleep 300
