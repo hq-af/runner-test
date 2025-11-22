@@ -1,4 +1,4 @@
-name: macOS VNC Access
+name: macOS test
 
 on: [workflow_dispatch]
 
@@ -9,24 +9,14 @@ jobs:
       - name: Show macOS version
         run: sw_vers
 
-      - name: Enable Apple Screen Sharing (VNC)
-        run: |
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
-            -activate -configure -access -on \
-            -clientopts -setvnclegacy -vnclegacy yes \
-            -clientopts -setvncpw -vncpw "mypassword" \
-            -restart -agent -privs -all
+      - name: Take screenshot of virtual display
+        run: screencapture screenshot.png
 
-      - name: Display connection info
-        run: |
-          LOCAL_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || echo "Unknown")
-          PUBLIC_IP=$(curl -s https://api.ipify.org || echo "Unavailable")
+      - name: Upload screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-desktop-screenshot
+          path: screenshot.png
 
-          echo "VNC server enabled."
-          echo "Local IP: $LOCAL_IP"
-          echo "Public IP (external): $PUBLIC_IP"
-          echo "Port: 5900"
-          echo "Password: mypassword"
-
-          echo "Sleeping for 5 minutes..."
-          sleep 300
+      - name: Output artifact URL
+        run: echo "Artifact URL will be available in the 'Artifacts' section of this workflow run."
